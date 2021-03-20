@@ -1,34 +1,44 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useContext, useState } from 'react';
 
 import ReactModal from 'react-modal';
 
 import closeImg from '../../assets/close.svg'
 import incomeImg from '../../assets/income.svg'
 import outcomeImg from '../../assets/outcome.svg'
-import api from '../../services/api';
+
+import { TransactionsContext } from '../../TransactionsContext';
 
 import { Container, TransactionTypeContainer, RadioBox } from './styles';
 
-interface ModalProps {
+interface TransactionModalProps {
   isOpen: boolean;
   onRequestClose: () => void;
 }
 
 ReactModal.setAppElement('#root');
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onRequestClose }) => {
+const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onRequestClose }) => {
+  const { createTransaction } = useContext(TransactionsContext);
+
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState(0);
   const [category, setCategory] = useState('');
   const [type, setType] = useState('income');
 
-  function handleCreateNewTransaction(event: FormEvent) {
+  async function handleCreateNewTransaction(event: FormEvent) {
     event.preventDefault();
 
-    const data = {title, amount, category, type}
+    const data = {title, amount, category, type};
 
-    api.post('/transactions', data)
+    await createTransaction(data);
+
+    setTitle('');
+    setAmount(0);
+    setCategory('');
+    setType('income');
+    onRequestClose();
   }
+
   return (
     <ReactModal
       isOpen={isOpen}
@@ -92,4 +102,4 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onRequestClose }) => {
   );
 };
 
-export default Modal;
+export default TransactionModal;
